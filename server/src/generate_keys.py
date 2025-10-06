@@ -1,8 +1,8 @@
 # This script generates RSA public and private keys and saves them to PEM files
 # PURELY FOR DEVELOPMENT/TESTING PURPOSES
 # DO NOT USE IN PRODUCTION
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 # Generate private key
 private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
