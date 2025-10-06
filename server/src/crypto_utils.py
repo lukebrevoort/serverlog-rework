@@ -6,8 +6,20 @@ import base64
 
 
 def encrypt_data(public_key_pem: str, plaintext: str) -> str:
-    """Encrpt data with RSA public key in PEM format."""
+    """Encrypt data with RSA public key in PEM format."""
     try:
+        if not public_key_pem.startswith("-----BEGIN PUBLIC KEY-----"):
+            raise ValueError("Invalid public key format, must be PEM format such as '-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----\n Read more on formatting for PEM at README.md'")
+        
+        pem_lines = public_key_pem.strip().splitlines()
+        if len(pem_lines) < 3 or not pem_lines[0].startswith("-----BEGIN PUBLIC KEY-----") or not pem_lines[-1].startswith("-----END PUBLIC KEY-----"):
+            raise ValueError("PEM must contain valid BEGIN/END PUBLIC KEY headers. such as '-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----\n Read more on formatting for PEM at README.md'")
+        key_body = "".join(pem_lines[1:-1])
+
+        try:
+            base64.b64decode(key_body, validate=True)
+        except Exception:
+            raise ValueError("Public key body is not valid base64-encoded data. An example of a valid PEM public key format is provided in the README.md")
         public_key = serialization.load_pem_public_key(
             public_key_pem.encode(),
             backend=default_backend()
