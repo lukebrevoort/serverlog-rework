@@ -32,14 +32,40 @@ jobs:
           pip install flake8 black isort
           pip install -r requirements.txt
       
-      - name: Run flake8
+      - name: Run flake8 (syntax errors)
+        id: flake8-syntax
         run: flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
-      
-      - name: Run flake8 (full)
-        run: flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        continue-on-error: true
       
       - name: Check code formatting with black
+        id: black-check
         run: black --check src
+        continue-on-error: true
       
       - name: Check import sorting with isort
+        id: isort-check
         run: isort --check-only src
+        continue-on-error: true
+      
+      - name: Auto-format code with black
+        if: steps.black-check.outcome == 'failure'
+        run: black src
+      
+      - name: Auto-sort imports with isort
+        if: steps.isort-check.outcome == 'failure'
+        run: isort src
+      
+      - name: Commit formatted code
+        if: steps.black-check.outcome == 'failure' || steps.isort-check.outcome == 'failure'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format Python code [skip ci]"
+          file_pattern: 'server/**'
+      
+      - name: Run flake8 (full check)
+        run: flake8 src --count --max-complexity=10 --max-line-length=127 --statistics
+      
+      - name: Verify formatting
+        run: |
+          black --check src
+          isort --check-only src

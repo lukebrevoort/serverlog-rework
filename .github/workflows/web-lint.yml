@@ -31,3 +31,19 @@ jobs:
       
       - name: Run ESLint
         run: npm run lint
+        continue-on-error: true
+      
+      - name: Auto-fix ESLint issues
+        if: failure()
+        run: npm run lint -- --fix
+      
+      - name: Commit formatted code
+        if: failure()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-fix linting issues [skip ci]"
+          file_pattern: 'web/**'
+      
+      - name: Run ESLint again to verify
+        if: failure()
+        run: npm run lint
