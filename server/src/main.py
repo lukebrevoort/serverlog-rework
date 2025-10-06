@@ -1,18 +1,14 @@
-from fastapi import FastAPI, Request, Depends, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 import time
 
-from .database import engine, get_db, Base
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+
+from .crypto_utils import decrypt_data, encrypt_data
+from .database import Base, engine, get_db
 from .models import LogEntry as Log
-from .schemas import (
-    EncryptRequest,
-    DecryptRequest,
-    CryptoResponse,
-    LogResponse,
-    LogsResponse,
-)
-from .crypto_utils import encrypt_data, decrypt_data
+from .schemas import (CryptoResponse, DecryptRequest, EncryptRequest,
+                      LogResponse, LogsResponse)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
