@@ -12,21 +12,21 @@ public_key = private_key.public_key()
 private_pem = private_key.private_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PrivateFormat.PKCS8,
-    encryption_algorithm=serialization.NoEncryption()
+    encryption_algorithm=serialization.NoEncryption(),
 ).decode()
 
 public_pem = public_key.public_bytes(
     encoding=serialization.Encoding.PEM,
-    format=serialization.PublicFormat.SubjectPublicKeyInfo
+    format=serialization.PublicFormat.SubjectPublicKeyInfo,
 ).decode()
 
-print("="*50)
+print("=" * 50)
 print("PUBLIC KEY:")
 print(public_pem)
-print("="*50)
+print("=" * 50)
 print("PRIVATE KEY:")
 print(private_pem)
-print("="*50)
+print("=" * 50)
 
 # Test encryption
 plaintext = "Hello Blueprint!"
@@ -35,8 +35,8 @@ ciphertext = public_key.encrypt(
     padding.OAEP(
         mgf=padding.MGF1(algorithm=hashes.SHA256()),
         algorithm=hashes.SHA256(),
-        label=None
-    )
+        label=None,
+    ),
 )
 encrypted_b64 = base64.b64encode(ciphertext).decode()
 print(f"Encrypted: {encrypted_b64[:50]}...")
@@ -47,10 +47,9 @@ decrypted = private_key.decrypt(
     padding.OAEP(
         mgf=padding.MGF1(algorithm=hashes.SHA256()),
         algorithm=hashes.SHA256(),
-        label=None
-    )
+        label=None,
+    ),
 )
 print(f"Decrypted: {decrypted.decode()}")
-print("="*50)
+print("=" * 50)
 print("✅ CRYPTO WORKS! Save these keys for testing.")
-
