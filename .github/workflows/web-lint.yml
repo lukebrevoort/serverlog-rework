@@ -1,0 +1,54 @@
+name: Web Lint
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - 'web/**'
+      - '.github/workflows/web-lint.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./web
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+      
+      - name: Auto-fix ESLint issues
+        if: failure()
+        run: npm run lint -- --fix
+      
+      - name: Commit formatted code
+        if: failure()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-fix linting issues [skip ci]"
+          file_pattern: 'web/**'
+      
+      - name: Run ESLint again to verify
+        if: failure()
+        run: npm run lint

@@ -1,0 +1,69 @@
+name: Server Lint
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-lint.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./server
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: server/requirements.txt
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
+          pip install -r requirements.txt
+      
+      - name: Check code formatting with black
+        id: black-check
+        run: black --check src
+        continue-on-error: true
+      
+      - name: Check import sorting with isort
+        id: isort-check
+        run: isort --check-only src
+        continue-on-error: true
+      
+      - name: Auto-format code with black
+        if: steps.black-check.outcome == 'failure'
+        run: black src
+      
+      - name: Auto-sort imports with isort
+        if: steps.isort-check.outcome == 'failure'
+        run: isort src
+      
+      - name: Commit formatted code
+        if: steps.black-check.outcome == 'failure' || steps.isort-check.outcome == 'failure'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format Python code [skip ci]"
+          file_pattern: 'server/**'
+      
+      - name: Run flake8 (syntax errors)
+        run: flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+      
+      - name: Run flake8 (full check)
+        run: flake8 src --count --max-complexity=10 --max-line-length=127 --statistics
