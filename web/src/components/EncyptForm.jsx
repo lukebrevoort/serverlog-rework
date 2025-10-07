@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -17,10 +17,27 @@ export function EncryptionForm({ onLog }) {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+  const [lastRequestKey, setLastRequestKey] = useState('');
+  const [lastRequestPayload, setLastRequestPayload] = useState('');
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [tick, setTick] = useState(0);
+  const timerRef = useRef(null);
+  const COOLDOWN_MS = 5000; // 5 seconds cooldown for same request
 
   const handleEncrypt = async () => {
     if (!key.trim() || !payload.trim()) {
       setError('Please provide both encryption key and payload');
+      return;
+    }
+
+    // Prevent duplicate requests with identical key+payload during cooldown
+    if (
+      lastRequestKey === key &&
+      lastRequestPayload === payload &&
+      cooldownUntil > Date.now()
+    ) {
+      const secsLeft = Math.ceil((cooldownUntil - Date.now()) / 1000);
+      setError(`Please wait ${secsLeft} second${secsLeft === 1 ? '' : 's'} before retrying the same request`);
       return;
     }
 
@@ -31,6 +48,11 @@ export function EncryptionForm({ onLog }) {
       const response = await encryptData(key, payload);
       setResult(response.data);
       toast.success('Payload encrypted successfully!');
+      // set cooldown for identical requests
+      setLastRequestKey(key);
+      setLastRequestPayload(payload);
+      const until = Date.now() + COOLDOWN_MS;
+      setCooldownUntil(until);
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Encryption failed. Please check your key format.';
       setError(errorMsg);
@@ -39,6 +61,25 @@ export function EncryptionForm({ onLog }) {
       setIsLoading(false);
     }
   };
+
+  // tick to trigger re-render while cooldown is active
+  useEffect(() => {
+    if (cooldownUntil && cooldownUntil > Date.now()) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => setTick((t) => t + 1), 1000);
+      return () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = null;
+      };
+    }
+    // ensure timer cleared if cooldown not active
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [cooldownUntil]);
 
   const copyToClipboard = async () => {
     try {
@@ -100,7 +141,9 @@ export function EncryptionForm({ onLog }) {
 
           <Button 
             onClick={handleEncrypt}
-            disabled={isLoading || !key.trim() || !payload.trim()}
+            disabled={
+              isLoading || !key.trim() || !payload.trim() || (cooldownUntil > Date.now() && lastRequestKey === key && lastRequestPayload === payload)
+            }
             className="w-full"
             size="lg"
           >
@@ -116,6 +159,12 @@ export function EncryptionForm({ onLog }) {
               </>
             )}
           </Button>
+
+          {cooldownUntil > Date.now() && lastRequestKey === key && lastRequestPayload === payload && (
+            <div className="text-sm text-muted-foreground">
+              Please wait {Math.ceil((cooldownUntil - Date.now()) / 1000)} second{Math.ceil((cooldownUntil - Date.now()) / 1000) === 1 ? '' : 's'} before retrying this same request.
+            </div>
+          )}
 
           {error && (
             <motion.div
