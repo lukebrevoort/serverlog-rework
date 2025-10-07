@@ -48,8 +48,7 @@ function EncryptForm() {
             id="encrypt-key"
             value={key}
             onChange={(e) => setKey(e.target.value)}
-            placeholder="-----BEGIN PUBLIC KEY-----&#10;MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
-&#10;-----END PUBLIC KEY-----"
+            placeholder="-----BEGIN PUBLIC KEY-----&#10;MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...&#10;-----END PUBLIC KEY-----"
             rows="8"
             required
             disabled={loading}
@@ -87,7 +86,7 @@ function EncryptForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-gradient-to-r from-primary-500 to-secondary-500 
+          className="w-full py-4 bg-gradient-to-r from-pink-500 to-red-500 
                    text-white font-semibold text-lg rounded-lg shadow-md
                    hover:shadow-xl hover:-translate-y-0.5 
                    disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none
@@ -108,15 +107,15 @@ function EncryptForm() {
 
       {/* Result Display */}
       {result && (
-        <div className="mt-8 p-6 bg-gray-50 border-2 border-gray-200 rounded-lg">
+        <div className="mt-8 p-6 bg-green-50 border-2 border-green-200 rounded-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-800">
-              ✅ Encrypted Result
+              ✅ Decrypted Result
             </h3>
             <button
               onClick={handleCopy}
-              className="px-4 py-2 bg-primary-500 text-white rounded-lg font-semibold
-                       hover:bg-primary-600 hover:-translate-y-0.5 transition-all duration-200
+              className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold
+                       hover:bg-green-600 hover:-translate-y-0.5 transition-all duration-200
                        shadow-md hover:shadow-lg"
             >
               📋 Copy

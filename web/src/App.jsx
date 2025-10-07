@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import EncryptForm from './components/EncryptForm'
+import DecryptForm from './components/DecryptForm'
 
 function App() {
   return (
@@ -21,8 +22,7 @@ function App() {
 
         {/* Decryption Section */}
         <section className='mb-8 bg-white rounded-lg shadow-md p-6'>
-          <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Decrypt Data</h2>
-          <p className='text-gray-600'>Decryption component will go here</p>
+          <DecryptForm />
         </section>
 
         {/* Logs Section */}
