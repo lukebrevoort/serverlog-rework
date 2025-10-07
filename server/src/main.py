@@ -8,7 +8,7 @@ from .crypto_utils import decrypt_data, encrypt_data
 from .database import Base, engine, get_db
 from .models import LogEntry as Log
 from .schemas import (CryptoResponse, DecryptRequest, EncryptRequest,
-                      LogResponse, LogsResponse)
+                      KeyPairResponse, LogResponse, LogsResponse)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -122,6 +122,40 @@ def get_logs(
     ]
 
     return LogsResponse(logs=log_responses, total=total, size=size, offset=offset)
+
+
+@app.post("/api/v1/generate-keys", response_model=KeyPairResponse)
+async def generate_keys():
+    """Generate a new RSA key pair"""
+    try:
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+
+        # Generate private key
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+        )
+
+        # Generate public key
+        public_key = private_key.public_key()
+
+        # Serialize to PEM format
+        private_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode()
+
+        public_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ).decode()
+
+        return KeyPairResponse(public_key=public_pem, private_key=private_pem)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Key generation failed: {str(e)}")
 
 
 if __name__ == "__main__":

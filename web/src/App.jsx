@@ -1,4 +1,8 @@
-// import { useState } from 'react'
+import { useState } from 'react'
+import EncryptForm from './components/EncryptForm'
+import DecryptForm from './components/DecryptForm'
+import LogsTable from './components/LogsTable'
+import KeyGenerator from './components/KeyGenerator';
 
 function App() {
   return (
@@ -11,24 +15,26 @@ function App() {
         </div>
       </header>
 
+
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
+        {/* Key Generation Section */}
+        <section className='mb-8 bg-white rounded-lg shadow-md p-6'>
+          <KeyGenerator />
+        </section>
         {/* Encryption Section */}
         <section className='mb-8 bg-white rounded-lg shadow-md p-6'>
-          <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Encrypt Data</h2>
-          <p className='text-gray-600'>Encryption component will go here</p>
+          <EncryptForm />
         </section>
 
         {/* Decryption Section */}
         <section className='mb-8 bg-white rounded-lg shadow-md p-6'>
-          <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Decrypt Data</h2>
-          <p className='text-gray-600'>Decryption component will go here</p>
+          <DecryptForm />
         </section>
 
         {/* Logs Section */}
         <section className='bg-white rounded-lg shadow-md p-6'>
-          <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Activity Logs</h2>
-          <p className='text-gray-600'>Logs display component will go here</p>
+          <LogsTable />
         </section>
       </main>
 

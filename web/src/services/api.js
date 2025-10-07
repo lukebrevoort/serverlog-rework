@@ -26,4 +26,9 @@ export const getLogs = async (size = 10, offset = 0) => {
   return response.data;
 };
 
+export const generateKeys = async () => {
+  const response = await api.post('/api/v1/generate-keys');
+  return response.data;
+};
+
 export default api;
