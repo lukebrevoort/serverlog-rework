@@ -10,7 +10,9 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
     try:
         if not public_key_pem.startswith("-----BEGIN PUBLIC KEY-----"):
             raise ValueError(
-                "Invalid public key format, must be PEM format such as '-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----\n Read more on formatting for PEM at README.md'"
+                "Invalid public key format, must be PEM format such as "
+                "'-----BEGIN PUBLIC KEY-----\\n...\\n-----END PUBLIC KEY-----\\n "
+                "Read more on formatting for PEM at README.md'"
             )
 
         pem_lines = public_key_pem.strip().splitlines()
@@ -20,7 +22,9 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             or not pem_lines[-1].startswith("-----END PUBLIC KEY-----")
         ):
             raise ValueError(
-                "PEM must contain valid BEGIN/END PUBLIC KEY headers. such as '-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----\n Read more on formatting for PEM at README.md'"
+                "PEM must contain valid BEGIN/END PUBLIC KEY headers. such as "
+                "'-----BEGIN PUBLIC KEY-----\\n...\\n-----END PUBLIC KEY-----\\n "
+                "Read more on formatting for PEM at README.md'"
             )
         key_body = "".join(pem_lines[1:-1])
 
@@ -28,7 +32,8 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             base64.b64decode(key_body, validate=True)
         except Exception:
             raise ValueError(
-                "Public key body is not valid base64-encoded data. An example of a valid PEM public key format is provided in the README.md"
+                "Public key body is not valid base64-encoded data. "
+                "An example of a valid PEM public key format is provided in the README.md"
             )
         public_key = serialization.load_pem_public_key(
             public_key_pem.encode(), backend=default_backend()
