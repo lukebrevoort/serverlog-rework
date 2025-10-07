@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
-import { Loader2, Lock, Copy, CheckCircle } from 'lucide-react';
+import { Loader2, Lock, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { encryptData } from '../services/api';
 
@@ -16,35 +16,25 @@ export function EncryptionForm({ onLog }) {
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
 
   const handleEncrypt = async () => {
     if (!key.trim() || !payload.trim()) {
-      toast.error('Please provide both encryption key and payload');
+      setError('Please provide both encryption key and payload');
       return;
     }
 
     setIsLoading(true);
+    setError('');
     try {
       // Call actual API
       const response = await encryptData(key, payload);
       setResult(response.data);
-      
-      // Log the request if onLog is provided
-      if (onLog) {
-        const logEntry = {
-          id: crypto.randomUUID(),
-          timestamp: Math.floor(Date.now() / 1000),
-          ip: '127.0.0.1',
-          data: `Encrypted payload of ${payload.length} characters`,
-          type: 'encrypt'
-        };
-        onLog(logEntry);
-      }
-      
       toast.success('Payload encrypted successfully!');
-    } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Encryption failed. Please check your key format.';
-      toast.error(errorMsg);
+    } catch (err) {
+      const errorMsg = err.response?.data?.detail || 'Encryption failed. Please check your key format.';
+      setError(errorMsg);
+      // keep toast for success only
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +116,18 @@ export function EncryptionForm({ onLog }) {
               </>
             )}
           </Button>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+            >
+              <AlertCircle className="h-4 w-4 text-destructive" />
+              <span className="text-sm text-destructive">{error}</span>
+            </motion.div>
+          )}
 
           {result && (
             <motion.div

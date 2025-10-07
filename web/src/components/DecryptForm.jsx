@@ -20,7 +20,7 @@ export function DecryptionForm({ onLog }) {
 
   const handleDecrypt = async () => {
     if (!key.trim() || !payload.trim()) {
-      toast.error('Please provide both decryption key and encrypted data');
+      setError('Please provide both decryption key and encrypted data');
       return;
     }
 
@@ -32,24 +32,12 @@ export function DecryptionForm({ onLog }) {
       // Call actual API
       const response = await decryptData(key, payload);
       setResult(response.data);
-      
-      // Log the request if onLog is provided
-      if (onLog) {
-        const logEntry = {
-          id: crypto.randomUUID(),
-          timestamp: Math.floor(Date.now() / 1000),
-          ip: '127.0.0.1',
-          data: `Decrypted payload of ${payload.length} characters`,
-          type: 'decrypt'
-        };
-        onLog(logEntry);
-      }
+    
       
       toast.success('Data decrypted successfully!');
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Decryption failed. Please check your key and data.';
       setError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
