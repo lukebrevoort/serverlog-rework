@@ -7,8 +7,14 @@ from sqlalchemy.orm import Session
 from .crypto_utils import decrypt_data, encrypt_data
 from .database import Base, engine, get_db
 from .models import LogEntry as Log
-from .schemas import (CryptoResponse, DecryptRequest, EncryptRequest,
-                      KeyPairResponse, LogResponse, LogsResponse)
+from .schemas import (
+    CryptoResponse,
+    DecryptRequest,
+    EncryptRequest,
+    KeyPairResponse,
+    LogResponse,
+    LogsResponse,
+)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
