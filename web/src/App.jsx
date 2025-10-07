@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import EncryptForm from './components/EncryptForm'
 import DecryptForm from './components/DecryptForm'
+import LogsTable from './components/LogsTable'
 
 function App() {
   return (
@@ -27,8 +28,7 @@ function App() {
 
         {/* Logs Section */}
         <section className='bg-white rounded-lg shadow-md p-6'>
-          <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Activity Logs</h2>
-          <p className='text-gray-600'>Logs display component will go here</p>
+          <LogsTable />
         </section>
       </main>
 
