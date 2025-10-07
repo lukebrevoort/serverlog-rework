@@ -2,6 +2,7 @@ import { useState } from 'react'
 import EncryptForm from './components/EncryptForm'
 import DecryptForm from './components/DecryptForm'
 import LogsTable from './components/LogsTable'
+import KeyGenerator from './components/KeyGenerator';
 
 function App() {
   return (
@@ -14,8 +15,13 @@ function App() {
         </div>
       </header>
 
+
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
+        {/* Key Generation Section */}
+        <section className='mb-8 bg-white rounded-lg shadow-md p-6'>
+          <KeyGenerator />
+        </section>
         {/* Encryption Section */}
         <section className='mb-8 bg-white rounded-lg shadow-md p-6'>
           <EncryptForm />
