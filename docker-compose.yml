@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15-alpine
@@ -5,8 +7,6 @@ services:
       POSTGRES_USER: secureloguser
       POSTGRES_PASSWORD: securelogpass
       POSTGRES_DB: securelogdb
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,6 +14,37 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - securelog-network
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://secureloguser:securelogpass@db:5432/securelogdb
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - securelog-network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - securelog-network
 
 volumes:
   postgres_data:
+
+networks:
+  securelog-network:
+    driver: bridge
