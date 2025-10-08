@@ -6,7 +6,7 @@ import { DecryptionForm } from './components/DecryptForm';
 import { LogsViewer } from './components/LogsViewer';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toaster } from './components/ui/sonner';
-import { Shield, Lock, Unlock, History, Key } from 'lucide-react';
+import { Shield, Lock, Unlock, History } from 'lucide-react';
 
 function App() {
   const [logs, setLogs] = useState([]);
