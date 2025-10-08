@@ -47,7 +47,7 @@ def _validate_pem_header(pem_lines: list, key_type: str = "public") -> None:
         if key_type == "public"
         else "-----BEGIN PRIVATE KEY-----"
     )
-    
+
     if not pem_lines[0].strip().startswith(expected_header):
         raise ValueError(
             f"Invalid {key_type} key header: The first line must be "
@@ -63,7 +63,7 @@ def _validate_pem_footer(pem_lines: list, key_type: str = "public") -> None:
         if key_type == "public"
         else "-----END PRIVATE KEY-----"
     )
-    
+
     if not pem_lines[-1].strip().startswith(expected_footer):
         raise ValueError(
             f"Invalid {key_type} key footer: The last line must be "
@@ -128,8 +128,7 @@ def _validate_plaintext(plaintext: str) -> bytes:
     """Validate plaintext and return encoded bytes"""
     if not plaintext or not plaintext.strip():
         raise ValueError(
-            "Data to encrypt is required. Please enter the text you want "
-            "to encrypt."
+            "Data to encrypt is required. Please enter the text you want " "to encrypt."
         )
     return plaintext.encode()
 
@@ -175,16 +174,16 @@ def _perform_encryption(public_key, plaintext_bytes: bytes) -> str:
 def encrypt_data(public_key_pem: str, plaintext: str) -> str:
     """Encrypt data with RSA public key in PEM format."""
     _validate_public_key_format(public_key_pem)
-    
+
     pem_lines = public_key_pem.strip().splitlines()
     _validate_pem_structure(pem_lines, "public")
     _validate_pem_header(pem_lines, "public")
     _validate_pem_footer(pem_lines, "public")
     _validate_pem_body(pem_lines)
-    
+
     public_key = _load_public_key(public_key_pem)
     plaintext_bytes = _validate_plaintext(plaintext)
-    
+
     return _perform_encryption(public_key, plaintext_bytes)
 
 
@@ -199,9 +198,7 @@ def _validate_private_key_format(private_key_pem: str) -> tuple:
         )
 
     private_key_pem_stripped = private_key_pem.strip()
-    is_pkcs1 = private_key_pem_stripped.startswith(
-        "-----BEGIN RSA PRIVATE KEY-----"
-    )
+    is_pkcs1 = private_key_pem_stripped.startswith("-----BEGIN RSA PRIVATE KEY-----")
     is_pkcs8 = private_key_pem_stripped.startswith("-----BEGIN PRIVATE KEY-----")
 
     if not (is_pkcs1 or is_pkcs8):
@@ -222,11 +219,9 @@ def _validate_private_key_format(private_key_pem: str) -> tuple:
 def _validate_private_key_footer(pem_lines: list, is_pkcs1: bool) -> None:
     """Validate private key footer matches format"""
     expected_footer = (
-        "-----END RSA PRIVATE KEY-----"
-        if is_pkcs1
-        else "-----END PRIVATE KEY-----"
+        "-----END RSA PRIVATE KEY-----" if is_pkcs1 else "-----END PRIVATE KEY-----"
     )
-    
+
     if not pem_lines[-1].strip().startswith(expected_footer):
         raise ValueError(
             f"Invalid private key footer: The last line must be "
@@ -292,9 +287,7 @@ def _validate_and_decode_ciphertext(b64_ciphertext: str) -> bytes:
         )
 
     try:
-        ciphertext = base64.b64decode(
-            b64_ciphertext.strip().encode(), validate=True
-        )
+        ciphertext = base64.b64decode(b64_ciphertext.strip().encode(), validate=True)
     except Exception:
         raise ValueError(
             "Invalid encrypted data format: The encrypted data must be "
@@ -374,13 +367,13 @@ def _perform_decryption(private_key, ciphertext: bytes) -> str:
 def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
     """Decrypt data with RSA private key in PEM format."""
     is_pkcs1, is_pkcs8 = _validate_private_key_format(private_key_pem)
-    
+
     pem_lines = private_key_pem.strip().splitlines()
     _validate_pem_structure(pem_lines, "private")
     _validate_private_key_footer(pem_lines, is_pkcs1)
     _validate_pem_body(pem_lines)
-    
+
     private_key = _load_private_key(private_key_pem)
     ciphertext = _validate_and_decode_ciphertext(b64_ciphertext)
-    
+
     return _perform_decryption(private_key, ciphertext)
