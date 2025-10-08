@@ -7,8 +7,14 @@ from sqlalchemy.orm import Session
 from .crypto_utils import decrypt_data, encrypt_data
 from .database import Base, engine, get_db
 from .models import LogEntry as Log
-from .schemas import (CryptoResponse, DecryptRequest, EncryptRequest,
-                      KeyPairResponse, LogResponse, LogsResponse)
+from .schemas import (
+    CryptoResponse,
+    DecryptRequest,
+    EncryptRequest,
+    KeyPairResponse,
+    LogResponse,
+    LogsResponse,
+)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -18,7 +24,11 @@ app = FastAPI(title="SecureLog API", version="1.0.0")
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:80"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:80",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
