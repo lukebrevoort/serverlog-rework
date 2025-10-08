@@ -2,6 +2,8 @@
 
 A full-stack encryption service built with React, FastAPI, and PostgreSQL that provides RSA encryption/decryption capabilities with comprehensive request logging built for the Blueprint Developer Challenge!
 
+**Live Demo**: [https://securelog-web.fly.dev/](https://securelog-web.fly.dev/)
+
 ## Architecture Overview
 
 ```mermaid
@@ -10,41 +12,42 @@ graph TB
         UI["React + Vite + TailwindCSS"]
     end
     
-    subgraph WebServer["Nginx Server (Port 80)"]
-        NGINX["Static File Server<br/>Reverse Proxy"]
-    end
-    
-    subgraph Backend["FastAPI Backend (Port 8000)"]
-        API["API Endpoints"]
-        ENCRYPT["POST /api/v1/encrypt"]
-        DECRYPT["POST /api/v1/decrypt"]
-        LOGS["GET /api/v1/logs"]
-        KEYGEN["POST /api/v1/generate-keys"]
-        CRYPTO["RSA-OAEP Encryption<br/>(cryptography library)"]
+    subgraph FlyIO["Fly.io Cloud Platform"]
+        subgraph WebApp["Web App (securelog-web)"]
+            NGINX["Nginx Server<br/>Static File Server<br/>Reverse Proxy"]
+        end
         
-        API --> ENCRYPT
-        API --> DECRYPT
-        API --> LOGS
-        API --> KEYGEN
-        ENCRYPT --> CRYPTO
-        DECRYPT --> CRYPTO
+        subgraph APIApp["API App (securelog-api)"]
+            API["FastAPI Endpoints"]
+            ENCRYPT["POST /api/v1/encrypt"]
+            DECRYPT["POST /api/v1/decrypt"]
+            LOGS["GET /api/v1/logs"]
+            CRYPTO["RSA-OAEP Encryption<br/>(cryptography library)"]
+            
+            API --> ENCRYPT
+            API --> DECRYPT
+            API --> LOGS
+            ENCRYPT --> CRYPTO
+            DECRYPT --> CRYPTO
+        end
+        
+        subgraph DBApp["Database (securelog-db)"]
+            DB[(PostgreSQL)]
+            SCHEMA["• id: UUID<br/>• timestamp: UNIX<br/>• ip: String<br/>• data: Text<br/>• operation: String"]
+            DB -.schema.- SCHEMA
+        end
     end
     
-    subgraph Database["PostgreSQL Database (Port 5432)"]
-        DB[(logs table)]
-        SCHEMA["• id: UUID<br/>• timestamp: UNIX<br/>• ip: String<br/>• data: Text<br/>• operation: String"]
-        DB -.schema.- SCHEMA
-    end
-    
-    UI -->|HTTP/HTTPS| NGINX
-    NGINX -->|Proxy| API
+    UI -->|HTTPS| NGINX
+    NGINX -->|Internal Network| API
     CRYPTO -->|SQLAlchemy ORM| DB
     LOGS -->|Query| DB
 
     style Client fill:#e1f5ff
-    style WebServer fill:#fff4e1
-    style Backend fill:#ffe1f5
-    style Database fill:#e1ffe1
+    style FlyIO fill:#f0f0f0
+    style WebApp fill:#fff4e1
+    style APIApp fill:#ffe1f5
+    style DBApp fill:#e1ffe1
     style CRYPTO fill:#ffd1d1
     style DB fill:#c8e6c9
 ```
@@ -58,8 +61,19 @@ graph TB
 - **Comprehensive Error Handling**: Detailed, user-friendly error messages
 - **Dark/Light Theme**: Toggle between themes with system preference support
 - **Responsive Design**: Mobile-first responsive UI
-- **Docker Compose**: Full-stack containerized deployment
+- **Cloud Deployment**: Hosted on Fly.io with separate web, API, and database services
+- **Docker Compose**: Full-stack containerized local development
 - **CI/CD**: GitHub Actions workflows for linting
+
+## Live Demo
+
+🌐 **Production URL**: [https://securelog-web.fly.dev/](https://securelog-web.fly.dev/)
+
+The application is deployed on Fly.io with:
+- **Web App**: Static frontend served via Nginx
+- **API Service**: FastAPI backend
+- **Database**: PostgreSQL database
+- All services communicate over Fly.io's private network
 
 ## Quick Start
 
@@ -144,9 +158,9 @@ docker run -d \
 
 ## API Documentation
 
-### Base URL
-- Development: `http://localhost:8000`
-- Production: Configure your deployment URL
+### Base URLs
+- **Production**: `https://securelog-web.fly.dev`
+- **Local Development**: `http://localhost:8000`
 
 ### Endpoints
 
@@ -284,7 +298,7 @@ openssl rsa -in private_key.pem -pubout -out public_key.pem
 2. **Generate keys offline** - Use OpenSSL or similar tools locally
 3. **Rotate keys periodically** - Especially if they may be compromised
 4. **Use environment variables** - Never hardcode keys in your application
-5. **Development only** - The `/generate-keys` endpoint is for testing only
+5. **Client-side generation** - Consider generating keys in the browser for maximum security
 
 ### Error Handling
 The API provides detailed, user-friendly error messages for:
@@ -316,6 +330,12 @@ openssl genrsa -out private_key.pem 2048
 
 # Extract public key
 openssl rsa -in private_key.pem -pubout -out public_key.pem
+```
+
+Or use the Python script included in the repository:
+```bash
+cd server
+python src/generate_keys.py
 ```
 
 ### Test Encryption Flow
@@ -360,7 +380,8 @@ python src/test_crypto.py
 ### DevOps
 - **Docker** - Containerization
 - **Docker Compose** - Multi-container orchestration
-- **Nginx** - Web server (production)
+- **Nginx** - Web server and reverse proxy
+- **Fly.io** - Cloud hosting platform
 - **GitHub Actions** - CI/CD for linting
 
 ## Project Structure
@@ -391,6 +412,42 @@ securelog/
 ├── docker-compose.yml           # Multi-container setup
 └── README.md                    # This file
 ```
+
+## Deployment
+
+### Fly.io Production Deployment
+
+The application is deployed on Fly.io with three separate services:
+
+1. **Web App** (`securelog-web`)
+   - Nginx serving static React build
+   - Reverse proxies API requests to backend
+   - HTTPS enabled by default
+
+2. **API Service** (`securelog-api`)
+   - FastAPI application
+   - Communicates with database over private network
+   - Auto-scaling enabled
+
+3. **Database** (`securelog-db`)
+   - PostgreSQL database
+   - Persistent storage with volumes
+   - Private network access only
+
+Visit the live application at: [https://securelog-web.fly.dev/](https://securelog-web.fly.dev/)
+
+### Local Development with Docker
+
+For local development, use Docker Compose to run all services:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+- Web UI on `http://localhost`
+- API on `http://localhost:8000`
+- PostgreSQL on `localhost:5432`
 
 ## CI/CD
 
@@ -496,4 +553,4 @@ For questions or feedback about this project, please open an issue on GitHub.
 
 ---
 
-Security Reminder**: The key generation endpoint (`/api/v1/generate-keys`) is provided **solely for development and testing purposes**. In production environments, users should generate their own RSA key pairs using secure, offline methods such as OpenSSL, ssh-keygen, or other trusted cryptographic tools. Never use server-generated private keys for production encryption.
+**Built with ❤️ for the Blueprint Developer Challenge**
