@@ -114,31 +114,31 @@ export function EncryptionForm() {
       transition={{ duration: 0.5 }}
     >
       <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
+        <CardHeader className="space-y-1 sm:space-y-2">
           <div className="flex items-center gap-2">
-            <Lock className="h-5 w-5 text-primary" />
-            <CardTitle>Encrypt Data</CardTitle>
+            <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <CardTitle className="text-lg sm:text-xl">Encrypt Data</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Encrypt your sensitive data using a public key
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="encrypt-key">Public Key (PEM format)</Label>
+            <Label htmlFor="encrypt-key" className="text-sm sm:text-base">Public Key (PEM format)</Label>
             <Textarea
               id="encrypt-key"
               placeholder="-----BEGIN PUBLIC KEY-----&#10;MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...&#10;-----END PUBLIC KEY-----"
               value={key}
               onChange={(e) => setKey(e.target.value)}
               disabled={isLoading}
-              rows={8}
-              className="font-mono text-sm"
+              rows={6}
+              className="font-mono text-xs sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="encrypt-payload">Data to Encrypt</Label>
+            <Label htmlFor="encrypt-payload" className="text-sm sm:text-base">Data to Encrypt</Label>
             <Textarea
               id="encrypt-payload"
               placeholder="Enter the data you want to encrypt"
@@ -146,9 +146,10 @@ export function EncryptionForm() {
               onChange={(e) => setPayload(e.target.value)}
               disabled={isLoading}
               rows={4}
+              className="text-sm"
             />
             {payload && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 Character count: {payload.length}
               </div>
             )}
@@ -176,7 +177,7 @@ export function EncryptionForm() {
           </Button>
 
           {cooldownUntil > Date.now() && lastRequestKey === key && lastRequestPayload === payload && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               Please wait {Math.ceil((cooldownUntil - Date.now()) / 1000)} second{Math.ceil((cooldownUntil - Date.now()) / 1000) === 1 ? '' : 's'} before retrying this same request.
             </div>
           )}
@@ -189,7 +190,7 @@ export function EncryptionForm() {
               className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
             >
               <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-destructive whitespace-pre-line">{_error}</span>
+              <span className="text-xs sm:text-sm text-destructive whitespace-pre-line break-words">{_error}</span>
             </motion.div>
           )}
 
@@ -201,8 +202,8 @@ export function EncryptionForm() {
               className="space-y-3"
             >
               <div className="flex items-center justify-between">
-                <Label>Encrypted Result</Label>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Label className="text-sm sm:text-base">Encrypted Result</Label>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                   Success
                 </Badge>
               </div>
@@ -211,7 +212,7 @@ export function EncryptionForm() {
                   value={result}
                   readOnly
                   rows={6}
-                  className="font-mono text-sm bg-muted"
+                  className="font-mono text-xs sm:text-sm bg-muted pr-12"
                 />
                 <Button
                   size="sm"

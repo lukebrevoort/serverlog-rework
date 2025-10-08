@@ -76,12 +76,12 @@ export function LogsViewer({ clientLogs = [] }) {
     >
       <Card className="w-full max-w-6xl mx-auto">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" />
+              <History className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <div>
-                <CardTitle>Request Logs</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Request Logs</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   View all encryption and decryption requests
                 </CardDescription>
               </div>
@@ -90,6 +90,8 @@ export function LogsViewer({ clientLogs = [] }) {
               variant="outline"
               onClick={handleRefresh}
               disabled={isLoading}
+              size="sm"
+              className="w-full sm:w-auto"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
@@ -100,22 +102,22 @@ export function LogsViewer({ clientLogs = [] }) {
           {allLogs.length === 0 ? (
             <div className="text-center py-12">
               <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No logs yet</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-base sm:text-lg font-medium mb-2">No logs yet</h3>
+              <p className="text-sm text-muted-foreground">
                 Encryption and decryption requests will appear here
               </p>
             </div>
           ) : (
             <>
-              <div className="rounded-lg border overflow-hidden">
+              <div className="rounded-lg border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Timestamp</TableHead>
-                      <TableHead>IP Address</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Request ID</TableHead>
+                      <TableHead className="whitespace-nowrap">Type</TableHead>
+                      <TableHead className="whitespace-nowrap hidden sm:table-cell">Timestamp</TableHead>
+                      <TableHead className="whitespace-nowrap hidden md:table-cell">IP Address</TableHead>
+                      <TableHead className="whitespace-nowrap">Description</TableHead>
+                      <TableHead className="text-right whitespace-nowrap hidden lg:table-cell">Request ID</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -124,10 +126,10 @@ export function LogsViewer({ clientLogs = [] }) {
                       Array.from({ length: 5 }).map((_, i) => (
                         <TableRow key={i}>
                           <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-32" /></TableCell>
+                          <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                          <TableCell><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                          <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                         </TableRow>
                       ))
                     ) : (
@@ -139,29 +141,30 @@ export function LogsViewer({ clientLogs = [] }) {
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                           className="group hover:bg-muted/50 transition-colors"
                         >
-                          <TableCell>
+                          <TableCell className="py-3">
                             <Badge 
                               variant={log.type === 'encrypt' ? 'default' : 'secondary'}
-                              className="flex items-center gap-1 w-fit"
+                              className="flex items-center gap-1 w-fit text-xs"
                             >
                               {log.type === 'encrypt' ? (
                                 <Lock className="h-3 w-3" />
                               ) : (
                                 <Unlock className="h-3 w-3" />
                               )}
-                              {log.type === 'encrypt' ? 'Encrypt' : 'Decrypt'}
+                              <span className="hidden sm:inline">{log.type === 'encrypt' ? 'Encrypt' : 'Decrypt'}</span>
+                              <span className="sm:hidden">{log.type === 'encrypt' ? 'Enc' : 'Dec'}</span>
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-mono text-sm">
+                          <TableCell className="font-mono text-xs sm:text-sm hidden sm:table-cell">
                             {formatTimestamp(log.timestamp)}
                           </TableCell>
-                          <TableCell className="font-mono">
+                          <TableCell className="font-mono text-xs hidden md:table-cell">
                             {log.ip}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-xs sm:text-sm max-w-[200px] truncate">
                             {log.data}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                          <TableCell className="text-right font-mono text-xs text-muted-foreground hidden lg:table-cell">
                             {log.id.slice(-8)}
                           </TableCell>
                         </motion.tr>
@@ -172,8 +175,8 @@ export function LogsViewer({ clientLogs = [] }) {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     Showing {startIndex + 1} to {Math.min(endIndex, allLogs.length)} of {allLogs.length} entries
                   </div>
                   
@@ -185,7 +188,7 @@ export function LogsViewer({ clientLogs = [] }) {
                       disabled={currentPage === 1}
                     >
                       <ChevronLeft className="h-4 w-4" />
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
                     </Button>
                     
                     <div className="flex items-center gap-1">
@@ -197,7 +200,7 @@ export function LogsViewer({ clientLogs = [] }) {
                             variant={currentPage === pageNum ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => goToPage(pageNum)}
-                            className="w-8 h-8 p-0"
+                            className="w-8 h-8 p-0 text-xs sm:text-sm"
                           >
                             {pageNum}
                           </Button>
@@ -205,12 +208,12 @@ export function LogsViewer({ clientLogs = [] }) {
                       })}
                       {totalPages > 5 && (
                         <>
-                          <span className="text-muted-foreground">...</span>
+                          <span className="text-muted-foreground text-xs sm:text-sm">...</span>
                           <Button
                             variant={currentPage === totalPages ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => goToPage(totalPages)}
-                            className="w-8 h-8 p-0"
+                            className="w-8 h-8 p-0 text-xs sm:text-sm"
                           >
                             {totalPages}
                           </Button>
@@ -224,7 +227,7 @@ export function LogsViewer({ clientLogs = [] }) {
                       onClick={() => goToPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
                     >
-                      Next
+                      <span className="hidden sm:inline">Next</span>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>

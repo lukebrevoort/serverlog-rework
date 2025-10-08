@@ -113,31 +113,31 @@ export function DecryptionForm() {
       transition={{ duration: 0.5, delay: 0.1 }}
     >
       <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
+        <CardHeader className="space-y-1 sm:space-y-2">
           <div className="flex items-center gap-2">
-            <Unlock className="h-5 w-5 text-primary" />
-            <CardTitle>Decrypt Data</CardTitle>
+            <Unlock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <CardTitle className="text-lg sm:text-xl">Decrypt Data</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Decrypt your encrypted data using the corresponding private key
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="decrypt-key">Private Key (PEM format)</Label>
+            <Label htmlFor="decrypt-key" className="text-sm sm:text-base">Private Key (PEM format)</Label>
             <Textarea
               id="decrypt-key"
               placeholder="-----BEGIN PRIVATE KEY-----&#10;MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwgg...&#10;-----END PRIVATE KEY-----"
               value={key}
               onChange={(e) => setKey(e.target.value)}
               disabled={isLoading}
-              rows={8}
-              className="font-mono text-sm"
+              rows={6}
+              className="font-mono text-xs sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="decrypt-payload">Encrypted Data</Label>
+            <Label htmlFor="decrypt-payload" className="text-sm sm:text-base">Encrypted Data</Label>
             <Textarea
               id="decrypt-payload"
               placeholder="Paste the encrypted data you want to decrypt"
@@ -145,10 +145,10 @@ export function DecryptionForm() {
               onChange={(e) => setPayload(e.target.value)}
               disabled={isLoading}
               rows={4}
-              className="font-mono text-sm"
+              className="font-mono text-xs sm:text-sm"
             />
             {payload && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 Data length: {payload.length} characters
               </div>
             )}
@@ -176,7 +176,7 @@ export function DecryptionForm() {
           </Button>
 
           {cooldownUntil > Date.now() && lastRequestKey === key && lastRequestPayload === payload && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               Please wait {Math.ceil((cooldownUntil - Date.now()) / 1000)} second{Math.ceil((cooldownUntil - Date.now()) / 1000) === 1 ? '' : 's'} before retrying this same request.
             </div>
           )}
@@ -189,7 +189,7 @@ export function DecryptionForm() {
               className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
             >
               <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-destructive whitespace-pre-line">{_error}</span>
+              <span className="text-xs sm:text-sm text-destructive whitespace-pre-line break-words">{_error}</span>
             </motion.div>
           )}
 
@@ -201,8 +201,8 @@ export function DecryptionForm() {
               className="space-y-3"
             >
               <div className="flex items-center justify-between">
-                <Label>Decrypted Result</Label>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Label className="text-sm sm:text-base">Decrypted Result</Label>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                   Success
                 </Badge>
               </div>
@@ -211,7 +211,7 @@ export function DecryptionForm() {
                   value={result}
                   readOnly
                   rows={6}
-                  className="bg-muted"
+                  className="bg-muted text-sm pr-12"
                 />
                 <Button
                   size="sm"
