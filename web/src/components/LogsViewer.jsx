@@ -42,6 +42,11 @@ export function LogsViewer({ clientLogs = [] }) {
       setTotal(response.total);
     } catch (error) {
       console.error('Failed to load logs:', error);
+      // Silently fail for logs - they're not critical to the app functionality
+      // User can see client-side logs even if server is down
+      if (error.isNetworkError || error.isConnectionRefused) {
+        setServerLogs([]); // Clear server logs if can't connect
+      }
     } finally {
       setIsLoading(false);
     }

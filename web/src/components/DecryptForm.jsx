@@ -55,8 +55,20 @@ export function DecryptionForm() {
       const until = Date.now() + COOLDOWN_MS;
       setCooldownUntil(until);
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Decryption failed. Please check your key and data.';
-      setError(errorMsg);
+      console.log('Decryption error:', err); // Debug logging
+      // Handle network/connection errors
+      if (err.isNetworkError || err.isConnectionRefused || err.isTimeoutError || err.isUnknownError) {
+        setError(err.message);
+      } else if (err.response?.data?.detail) {
+        // Handle API validation errors
+        setError(err.response.data.detail);
+      } else if (err.message) {
+        // Fallback to error message
+        setError(err.message);
+      } else {
+        // Last resort fallback
+        setError('Decryption failed. Please check your key and data.');
+      }
       // Ensure we don't show an old successful result when an error occurs
       setResult('');
     } finally {
@@ -174,10 +186,10 @@ export function DecryptionForm() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+              className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
             >
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <span className="text-sm text-destructive">{_error}</span>
+              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-destructive whitespace-pre-line">{_error}</span>
             </motion.div>
           )}
 
