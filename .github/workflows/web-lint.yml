@@ -34,21 +34,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Run ESLint
+      - name: Check for auto-fixable issues
+        id: lint-check
         run: npm run lint
         continue-on-error: true
       
-      - name: Auto-fix ESLint issues
-        if: failure()
+      - name: Auto-fix formatting issues
+        if: steps.lint-check.outcome == 'failure'
         run: npm run lint -- --fix
+        continue-on-error: true
       
       - name: Commit formatted code
-        if: failure()
+        if: steps.lint-check.outcome == 'failure'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: auto-fix linting issues [skip ci]"
           file_pattern: 'web/**'
       
-      - name: Run ESLint again to verify
-        if: failure()
+      - name: Run ESLint (strict) - Fail on remaining errors
         run: npm run lint
