@@ -5,6 +5,7 @@ import { EncryptionForm } from './components/EncyptForm';
 import { DecryptionForm } from './components/DecryptForm';
 import { LogsViewer } from './components/LogsViewer';
 import { KeyGeneratorForm } from './components/KeyGeneratorForm';
+import { ThemeToggle } from './components/ThemeToggle';
 import { Toaster } from './components/ui/sonner';
 import { Shield, Lock, Unlock, History, Key } from 'lucide-react';
 
@@ -25,36 +26,48 @@ function App() {
         className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-40"
       >
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="p-2 bg-primary rounded-lg"
-            >
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </motion.div>
-            <div>
-              <motion.h1 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-2xl font-bold text-primary"
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="p-2 bg-primary rounded-lg"
               >
-                SecureLog
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-sm text-muted-foreground"
-              >
-                Advanced Encryption Services
-              </motion.p>
+                <Shield className="h-6 w-6 text-primary-foreground" />
+              </motion.div>
+              <div>
+                <motion.h1 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="text-2xl font-bold text-primary"
+                >
+                  SecureLog
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="text-sm text-muted-foreground"
+                >
+                  Advanced Encryption Services
+                </motion.p>
+              </div>
             </div>
+            
+            {/* Theme Toggle */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <ThemeToggle />
+            </motion.div>
           </div>
         </div>
       </motion.header>
+
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
