@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
@@ -10,13 +9,13 @@ import { Loader2, Lock, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { encryptData } from '../services/api';
 
-export function EncryptionForm({ onLog }) {
+export function EncryptionForm() {
   const [key, setKey] = useState('');
   const [payload, setPayload] = useState('');
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState('');
+  const [_error, setError] = useState('');
   const [lastRequestKey, setLastRequestKey] = useState('');
   const [lastRequestPayload, setLastRequestPayload] = useState('');
   const [cooldownUntil, setCooldownUntil] = useState(0);
@@ -91,7 +90,7 @@ export function EncryptionForm({ onLog }) {
       setCopied(true);
       toast.success('Encrypted data copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to copy to clipboard');
     }
   };
@@ -170,7 +169,7 @@ export function EncryptionForm({ onLog }) {
             </div>
           )}
 
-          {error && (
+          {_error && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -178,11 +177,11 @@ export function EncryptionForm({ onLog }) {
               className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
             >
               <AlertCircle className="h-4 w-4 text-destructive" />
-              <span className="text-sm text-destructive">{error}</span>
+              <span className="text-sm text-destructive">{_error}</span>
             </motion.div>
           )}
 
-          {result && !error && (
+          {result && !_error && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
