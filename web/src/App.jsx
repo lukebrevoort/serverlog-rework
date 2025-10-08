@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { EncryptionForm } from './components/EncyptForm';
 import { DecryptionForm } from './components/DecryptForm';
 import { LogsViewer } from './components/LogsViewer';
-import { KeyGeneratorForm } from './components/KeyGeneratorForm';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toaster } from './components/ui/sonner';
 import { Shield, Lock, Unlock, History, Key } from 'lucide-react';
@@ -77,12 +76,7 @@ function App() {
           transition={{ duration: 0.6, delay: 0.5 }}
         >
           <Tabs defaultValue="keys" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 mb-6 sm:mb-8 bg-muted/50 h-auto">
-              <TabsTrigger value="keys" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-                <Key className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Generate Keys</span>
-                <span className="sm:hidden">Keys</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 gap-1 mb-6 sm:mb-8 bg-muted/50 h-auto">
               <TabsTrigger value="encrypt" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
                 <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
                 Encrypt
@@ -105,10 +99,6 @@ function App() {
                 )}
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="keys">
-              <KeyGeneratorForm />
-            </TabsContent>
 
             <TabsContent value="encrypt">
               <EncryptionForm onLog={addLog} />

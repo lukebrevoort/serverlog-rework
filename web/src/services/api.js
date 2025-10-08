@@ -93,13 +93,4 @@ export const getLogs = async (size = 10, offset = 0) => {
   }
 };
 
-export const generateKeys = async () => {
-  try {
-    const response = await api.post('/api/v1/generate-keys');
-    return response.data;
-  } catch (error) {
-    handleApiError(error, 'key generation');
-  }
-};
-
 export default api;

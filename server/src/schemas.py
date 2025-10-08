@@ -28,19 +28,6 @@ class LogResponse(BaseModel):
         from_attributes = True
 
 
-class KeyPairResponse(BaseModel):
-    public_key: str
-    private_key: str
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "public_key": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
-                "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
-            }
-        }
-
-
 class LogsResponse(BaseModel):
     logs: List[LogResponse]
     total: int
