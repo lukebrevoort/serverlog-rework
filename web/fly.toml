@@ -1,0 +1,45 @@
+# Fly.io configuration for SecureLog Web Frontend
+# Deploy with: fly deploy
+
+app = "securelog-web"
+primary_region = "iad" # Change to your preferred region (iad=Virginia, lhr=London, syd=Sydney, etc.)
+
+[build]
+  dockerfile = "Dockerfile"
+  [build.args]
+    VITE_API_URL = "https://securelog-api.fly.dev"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 80
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "5s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256

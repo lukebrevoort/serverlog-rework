@@ -22,6 +22,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:80",
+        "https://securelog-web.fly.dev",  # Production frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],

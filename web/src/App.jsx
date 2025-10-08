@@ -69,53 +69,53 @@ function App() {
 
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 sm:py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <Tabs defaultValue="keys" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 gap-1 mb-6 sm:mb-8 bg-muted/50 h-auto">
-              <TabsTrigger value="encrypt" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-                <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
-                Encrypt
-              </TabsTrigger>
-              <TabsTrigger value="decrypt" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-                <Unlock className="h-3 w-3 sm:h-4 sm:w-4" />
-                Decrypt
-              </TabsTrigger>
-              <TabsTrigger value="logs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-                <History className="h-3 w-3 sm:h-4 sm:w-4" />
-                Logs
-                {logs.length > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="ml-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full"
-                  >
-                    {logs.length}
-                  </motion.span>
-                )}
-              </TabsTrigger>
-            </TabsList>
+        <main className="container mx-auto px-4 py-6 sm:py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <Tabs defaultValue="encrypt" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 gap-1 mb-6 sm:mb-8 bg-muted/50 h-auto">
+            <TabsTrigger value="encrypt" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
+              Encrypt
+            </TabsTrigger>
+            <TabsTrigger value="decrypt" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <Unlock className="h-3 w-3 sm:h-4 sm:w-4" />
+              Decrypt
+            </TabsTrigger>
+            <TabsTrigger value="logs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <History className="h-3 w-3 sm:h-4 sm:w-4" />
+              Logs
+              {logs.length > 0 && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="ml-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full"
+            >
+              {logs.length}
+            </motion.span>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="encrypt">
-              <EncryptionForm onLog={addLog} />
-            </TabsContent>
+          <TabsContent value="encrypt">
+            <EncryptionForm onLog={addLog} />
+          </TabsContent>
 
-            <TabsContent value="decrypt">
-              <DecryptionForm onLog={addLog} />
-            </TabsContent>
+          <TabsContent value="decrypt">
+            <DecryptionForm onLog={addLog} />
+          </TabsContent>
 
-            <TabsContent value="logs">
-              <LogsViewer clientLogs={logs} />
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </main>
+          <TabsContent value="logs">
+            <LogsViewer clientLogs={logs} />
+          </TabsContent>
+            </Tabs>
+          </motion.div>
+        </main>
 
-      {/* Footer */}
+        {/* Footer */}
       <motion.footer 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
