@@ -536,6 +536,13 @@ docker compose exec db psql -U secureloguser -d securelogdb
 \d logs
 ```
 
+# Testing 
+
+## Web Testing 
+![alt text](image.png)
+
+## Server Testing
+![alt text](image-1.png)
 ## License
 
 This project is open source and available under the MIT License.
