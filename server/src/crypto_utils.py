@@ -5,106 +5,140 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
 
-def encrypt_data(public_key_pem: str, plaintext: str) -> str:
-    """Encrypt data with RSA public key in PEM format."""
-    # Input validation
+def _validate_public_key_format(public_key_pem: str) -> None:
+    """Validate public key format and structure"""
     if not public_key_pem or not public_key_pem.strip():
         raise ValueError(
-            "Public key is required. Please paste your RSA public key in PEM format. "
-            "It should start with '-----BEGIN PUBLIC KEY-----' and end with '-----END PUBLIC KEY-----'."
-        )
-    # Need to have data, incase user pastes empty string
-    if not plaintext or not plaintext.strip():
-        raise ValueError(
-            "Data to encrypt is required. Please enter the text you want to encrypt."
+            "Public key is required. Please paste your RSA public key in "
+            "PEM format. It should start with '-----BEGIN PUBLIC KEY-----' "
+            "and end with '-----END PUBLIC KEY-----'."
         )
 
-    # Check key format
     if not public_key_pem.strip().startswith("-----BEGIN PUBLIC KEY-----"):
         raise ValueError(
-            "Invalid public key format: The key must start with '-----BEGIN PUBLIC KEY-----'. "
-            "Make sure you're using a PUBLIC key (not a private key) and that it's in PEM format. "
+            "Invalid public key format: The key must start with "
+            "'-----BEGIN PUBLIC KEY-----'. Make sure you're using a PUBLIC "
+            "key (not a private key) and that it's in PEM format. "
             "The key should look like:\n"
             "-----BEGIN PUBLIC KEY-----\n"
             "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...\n"
             "-----END PUBLIC KEY-----"
         )
 
-    pem_lines = public_key_pem.strip().splitlines()
 
-    # Validate PEM structure
+def _validate_pem_structure(pem_lines: list, key_type: str = "public") -> None:
+    """Validate PEM structure for public or private keys"""
     if len(pem_lines) < 3:
         raise ValueError(
-            "Invalid public key structure: The key appears to be incomplete. "
-            "A valid PEM public key must have at least 3 lines:\n"
-            "1. -----BEGIN PUBLIC KEY-----\n"
+            f"Invalid {key_type} key structure: The key appears to be "
+            f"incomplete. A valid PEM {key_type} key must have at least "
+            "3 lines:\n"
+            f"1. -----BEGIN {key_type.upper()} KEY-----\n"
             "2. Base64-encoded key data (one or more lines)\n"
-            "3. -----END PUBLIC KEY-----\n"
+            f"3. -----END {key_type.upper()} KEY-----\n"
             "Please check that you copied the entire key."
         )
 
-    if not pem_lines[0].strip().startswith("-----BEGIN PUBLIC KEY-----"):
+
+def _validate_pem_header(pem_lines: list, key_type: str = "public") -> None:
+    """Validate PEM header line"""
+    expected_header = (
+        "-----BEGIN PUBLIC KEY-----"
+        if key_type == "public"
+        else "-----BEGIN PRIVATE KEY-----"
+    )
+    
+    if not pem_lines[0].strip().startswith(expected_header):
         raise ValueError(
-            "Invalid public key header: The first line must be '-----BEGIN PUBLIC KEY-----'. "
-            "Please ensure you're copying the complete public key starting from the header."
+            f"Invalid {key_type} key header: The first line must be "
+            f"'{expected_header}'. Please ensure you're copying the "
+            f"complete {key_type} key starting from the header."
         )
 
-    if not pem_lines[-1].strip().startswith("-----END PUBLIC KEY-----"):
+
+def _validate_pem_footer(pem_lines: list, key_type: str = "public") -> None:
+    """Validate PEM footer line"""
+    expected_footer = (
+        "-----END PUBLIC KEY-----"
+        if key_type == "public"
+        else "-----END PRIVATE KEY-----"
+    )
+    
+    if not pem_lines[-1].strip().startswith(expected_footer):
         raise ValueError(
-            "Invalid public key footer: The last line must be '-----END PUBLIC KEY-----'. "
-            "Please ensure you're copying the complete public key including the footer."
+            f"Invalid {key_type} key footer: The last line must be "
+            f"'{expected_footer}'. Please ensure you're copying the "
+            f"complete {key_type} key including the footer."
         )
 
-    # Validate base64 content
+
+def _validate_pem_body(pem_lines: list) -> None:
+    """Validate PEM body contains valid base64"""
     key_body = "".join(pem_lines[1:-1])
     if not key_body.strip():
         raise ValueError(
-            "Empty public key content: The key has valid headers but no data between them. "
-            "Please ensure you copied the complete key including the base64-encoded data."
+            "Empty key content: The key has valid headers but no data "
+            "between them. Please ensure you copied the complete key "
+            "including the base64-encoded data."
         )
 
     try:
         base64.b64decode(key_body, validate=True)
     except Exception:
         raise ValueError(
-            "Invalid public key encoding: The key data contains invalid characters or formatting. "
-            "The content between the BEGIN and END markers must be valid base64-encoded data. "
-            "Common issues:\n"
+            "Invalid key encoding: The key data contains invalid "
+            "characters or formatting. The content between the BEGIN and "
+            "END markers must be valid base64-encoded data. Common issues:\n"
             "- Extra spaces or special characters in the key data\n"
             "- Key data was corrupted during copy/paste\n"
             "- Wrong key format (make sure it's PEM, not DER or other formats)"
         )
 
-    # Load and validate the public key
+
+def _load_public_key(public_key_pem: str):
+    """Load and validate public key from PEM"""
     try:
         public_key = serialization.load_pem_public_key(
             public_key_pem.encode(), backend=default_backend()
         )
+        return public_key
     except ValueError as key_error:
         error_msg = str(key_error).lower()
         if "could not deserialize" in error_msg or "invalid" in error_msg:
             raise ValueError(
-                "Invalid RSA public key: The key format is correct but the key data is invalid. "
-                "Please ensure:\n"
+                "Invalid RSA public key: The key format is correct but the "
+                "key data is invalid. Please ensure:\n"
                 "- You're using an RSA public key (not EC, DSA, or other types)\n"
                 "- The key was generated correctly\n"
                 "- You copied the entire key without modifications"
             )
         else:
             raise ValueError(
-                "Cannot load public key. "
-                "Please verify that your key is a valid RSA public key in PEM format."
+                "Cannot load public key. Please verify that your key is a "
+                "valid RSA public key in PEM format."
             )
     except Exception:
         raise ValueError(
-            "Unexpected error loading public key. "
-            "Please ensure you're using a valid RSA public key in PEM format."
+            "Unexpected error loading public key. Please ensure you're "
+            "using a valid RSA public key in PEM format."
         )
 
-    # Perform encryption
+
+def _validate_plaintext(plaintext: str) -> bytes:
+    """Validate plaintext and return encoded bytes"""
+    if not plaintext or not plaintext.strip():
+        raise ValueError(
+            "Data to encrypt is required. Please enter the text you want "
+            "to encrypt."
+        )
+    return plaintext.encode()
+
+
+def _perform_encryption(public_key, plaintext_bytes: bytes) -> str:
+    """Perform RSA-OAEP encryption"""
     try:
         ciphertext = public_key.encrypt(
-            plaintext.encode(),
+            plaintext_bytes,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
@@ -115,10 +149,12 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
     except ValueError as encrypt_error:
         error_msg = str(encrypt_error).lower()
         if "too long" in error_msg or "data too large" in error_msg:
+            data_len = len(plaintext_bytes)
             raise ValueError(
-                "Data too large to encrypt: The text you're trying to encrypt is too long for this RSA key. "
-                "RSA encryption has size limits based on key size. For a 2048-bit key, you can encrypt up to ~190 bytes. "
-                f"Your data is {len(plaintext)} characters. "
+                "Data too large to encrypt: The text you're trying to "
+                "encrypt is too long for this RSA key. RSA encryption has "
+                "size limits based on key size. For a 2048-bit key, you can "
+                f"encrypt up to ~190 bytes. Your data is {data_len} bytes. "
                 "Solutions:\n"
                 "- Split your data into smaller chunks\n"
                 "- Use a larger RSA key (4096-bit)\n"
@@ -126,34 +162,46 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             )
         else:
             raise ValueError(
-                "Encryption failed. "
-                "This may indicate an issue with the key or the data format."
+                "Encryption failed. This may indicate an issue with the key "
+                "or the data format."
             )
     except Exception:
         raise ValueError(
-            "Unexpected encryption error. "
-            "Please try again or contact support if the issue persists."
+            "Unexpected encryption error. Please try again or contact "
+            "support if the issue persists."
         )
 
 
-def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
-    """Decrypt data with RSA private key in PEM format."""
-    # Input validation
+def encrypt_data(public_key_pem: str, plaintext: str) -> str:
+    """Encrypt data with RSA public key in PEM format."""
+    _validate_public_key_format(public_key_pem)
+    
+    pem_lines = public_key_pem.strip().splitlines()
+    _validate_pem_structure(pem_lines, "public")
+    _validate_pem_header(pem_lines, "public")
+    _validate_pem_footer(pem_lines, "public")
+    _validate_pem_body(pem_lines)
+    
+    public_key = _load_public_key(public_key_pem)
+    plaintext_bytes = _validate_plaintext(plaintext)
+    
+    return _perform_encryption(public_key, plaintext_bytes)
+
+
+def _validate_private_key_format(private_key_pem: str) -> tuple:
+    """Validate private key format and return key type info"""
     if not private_key_pem or not private_key_pem.strip():
         raise ValueError(
-            "Private key is required. Please paste your RSA private key in PEM format. "
-            "It should start with '-----BEGIN PRIVATE KEY-----' or '-----BEGIN RSA PRIVATE KEY-----' "
-            "and end with '-----END PRIVATE KEY-----' or '-----END RSA PRIVATE KEY-----'."
-        )
-    # Still require data, incase user pastes empty string
-    if not b64_ciphertext or not b64_ciphertext.strip():
-        raise ValueError(
-            "Encrypted data is required. Please paste the base64-encoded encrypted text you want to decrypt."
+            "Private key is required. Please paste your RSA private key in "
+            "PEM format. It should start with '-----BEGIN PRIVATE KEY-----' "
+            "or '-----BEGIN RSA PRIVATE KEY-----' and end with "
+            "'-----END PRIVATE KEY-----' or '-----END RSA PRIVATE KEY-----'."
         )
 
-    # Check key format
     private_key_pem_stripped = private_key_pem.strip()
-    is_pkcs1 = private_key_pem_stripped.startswith("-----BEGIN RSA PRIVATE KEY-----")
+    is_pkcs1 = private_key_pem_stripped.startswith(
+        "-----BEGIN RSA PRIVATE KEY-----"
+    )
     is_pkcs8 = private_key_pem_stripped.startswith("-----BEGIN PRIVATE KEY-----")
 
     if not (is_pkcs1 or is_pkcs8):
@@ -161,55 +209,47 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "Invalid private key format: The key must start with either:\n"
             "- '-----BEGIN PRIVATE KEY-----' (PKCS#8 format), or\n"
             "- '-----BEGIN RSA PRIVATE KEY-----' (PKCS#1 format)\n\n"
-            "Make sure you're using a PRIVATE key (not a public key) and that it's in PEM format. "
-            "The key should look like:\n"
+            "Make sure you're using a PRIVATE key (not a public key) and "
+            "that it's in PEM format. The key should look like:\n"
             "-----BEGIN PRIVATE KEY-----\n"
             "MIIEvgIBADANBgkqhkiG9w0BAQEFAASC...\n"
             "-----END PRIVATE KEY-----"
         )
 
-    pem_lines = private_key_pem_stripped.splitlines()
+    return is_pkcs1, is_pkcs8
 
-    # Validate PEM structure
-    if len(pem_lines) < 3:
-        raise ValueError(
-            "Invalid private key structure: The key appears to be incomplete. "
-            "A valid PEM private key must have at least 3 lines:\n"
-            "1. -----BEGIN PRIVATE KEY----- (or BEGIN RSA PRIVATE KEY)\n"
-            "2. Base64-encoded key data (one or more lines)\n"
-            "3. -----END PRIVATE KEY----- (or END RSA PRIVATE KEY)\n"
-            "Please check that you copied the entire key."
-        )
 
+def _validate_private_key_footer(pem_lines: list, is_pkcs1: bool) -> None:
+    """Validate private key footer matches format"""
     expected_footer = (
-        "-----END RSA PRIVATE KEY-----" if is_pkcs1 else "-----END PRIVATE KEY-----"
+        "-----END RSA PRIVATE KEY-----"
+        if is_pkcs1
+        else "-----END PRIVATE KEY-----"
     )
+    
     if not pem_lines[-1].strip().startswith(expected_footer):
         raise ValueError(
-            f"Invalid private key footer: The last line must be '{expected_footer}'. "
-            "Please ensure you're copying the complete private key including the footer."
+            f"Invalid private key footer: The last line must be "
+            f"'{expected_footer}'. Please ensure you're copying the "
+            "complete private key including the footer."
         )
 
-    # Validate base64 content
-    key_body = "".join(pem_lines[1:-1])
-    if not key_body.strip():
-        raise ValueError(
-            "Empty private key content: The key has valid headers but no data between them. "
-            "Please ensure you copied the complete key including the base64-encoded data."
-        )
 
-    # Load the private key
+def _load_private_key(private_key_pem: str):
+    """Load and validate private key from PEM"""
     try:
         private_key = serialization.load_pem_private_key(
             private_key_pem.encode(), password=None, backend=default_backend()
         )
+        return private_key
     except TypeError as type_error:
         error_msg = str(type_error).lower()
         if "password" in error_msg or "encrypted" in error_msg:
             raise ValueError(
-                "Password-protected private key detected: This key appears to be encrypted with a password. "
-                "Currently, only unencrypted private keys are supported. "
-                "To use this key, you need to:\n"
+                "Password-protected private key detected: This key appears "
+                "to be encrypted with a password. Currently, only "
+                "unencrypted private keys are supported. To use this key, "
+                "you need to:\n"
                 "1. Remove the password protection from your private key, or\n"
                 "2. Generate a new unencrypted key pair\n\n"
                 "To remove password protection using OpenSSL:\n"
@@ -217,41 +257,52 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             )
         else:
             raise ValueError(
-                "Invalid private key format. "
-                "Please ensure you're using a valid RSA private key in PEM format."
+                "Invalid private key format. Please ensure you're using a "
+                "valid RSA private key in PEM format."
             )
     except ValueError as key_error:
         error_msg = str(key_error).lower()
         if "could not deserialize" in error_msg or "invalid" in error_msg:
             raise ValueError(
-                "Invalid RSA private key: The key format appears correct but the key data is invalid. "
-                "Please ensure:\n"
-                "- You're using an RSA private key (not EC, DSA, or other types)\n"
+                "Invalid RSA private key: The key format appears correct "
+                "but the key data is invalid. Please ensure:\n"
+                "- You're using an RSA private key (not EC, DSA, or other)\n"
                 "- The key was generated correctly\n"
                 "- You copied the entire key without modifications\n"
                 "- The key matches the public key used for encryption"
             )
         else:
             raise ValueError(
-                "Cannot load private key. "
-                "Please verify that your key is a valid RSA private key in PEM format."
+                "Cannot load private key. Please verify that your key is a "
+                "valid RSA private key in PEM format."
             )
     except Exception:
         raise ValueError(
-            "Unexpected error loading private key. "
-            "Please ensure you're using a valid RSA private key in PEM format."
+            "Unexpected error loading private key. Please ensure you're "
+            "using a valid RSA private key in PEM format."
         )
 
-    # Validate and decode ciphertext
+
+def _validate_and_decode_ciphertext(b64_ciphertext: str) -> bytes:
+    """Validate and decode base64 ciphertext"""
+    if not b64_ciphertext or not b64_ciphertext.strip():
+        raise ValueError(
+            "Encrypted data is required. Please paste the base64-encoded "
+            "encrypted text you want to decrypt."
+        )
+
     try:
-        ciphertext = base64.b64decode(b64_ciphertext.strip().encode(), validate=True)
+        ciphertext = base64.b64decode(
+            b64_ciphertext.strip().encode(), validate=True
+        )
     except Exception:
         raise ValueError(
-            "Invalid encrypted data format: The encrypted data must be valid base64-encoded text. "
-            "Common issues:\n"
+            "Invalid encrypted data format: The encrypted data must be "
+            "valid base64-encoded text. Common issues:\n"
             "- The data was corrupted during copy/paste\n"
             "- Extra spaces or line breaks were added\n"
-            "- Wrong data was pasted (make sure it's the encrypted output, not the original text)"
+            "- Wrong data was pasted (make sure it's the encrypted output, "
+            "not the original text)"
         )
 
     if len(ciphertext) == 0:
@@ -260,7 +311,11 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "Please paste the complete base64-encoded encrypted text."
         )
 
-    # Perform decryption
+    return ciphertext
+
+
+def _perform_decryption(private_key, ciphertext: bytes) -> str:
+    """Perform RSA-OAEP decryption"""
     try:
         plaintext = private_key.decrypt(
             ciphertext,
@@ -275,39 +330,57 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
         error_msg = str(decrypt_error).lower()
         if "decryption failed" in error_msg or "incorrect" in error_msg:
             raise ValueError(
-                "Decryption failed: Unable to decrypt the data with this private key. "
-                "This usually means:\n"
-                "- The private key doesn't match the public key used for encryption\n"
+                "Decryption failed: Unable to decrypt the data with this "
+                "private key. This usually means:\n"
+                "- The private key doesn't match the public key used for "
+                "encryption\n"
                 "- The encrypted data was corrupted or modified\n"
                 "- The wrong encrypted data was provided\n\n"
                 "Please verify:\n"
-                "1. You're using the correct private key (matching the public key used to encrypt)\n"
+                "1. You're using the correct private key (matching the "
+                "public key used to encrypt)\n"
                 "2. The encrypted data hasn't been modified\n"
                 "3. You copied the complete encrypted text"
             )
         elif "invalid" in error_msg or "padding" in error_msg:
             raise ValueError(
-                "Invalid encryption format: The encrypted data doesn't match the expected format. "
-                "This could mean:\n"
+                "Invalid encryption format: The encrypted data doesn't "
+                "match the expected format. This could mean:\n"
                 "- Different encryption settings were used\n"
                 "- The data was encrypted with a different algorithm\n"
                 "- The encrypted data is corrupted"
             )
         else:
             raise ValueError(
-                "Decryption error. "
-                "Please verify that you're using the correct key and encrypted data."
+                "Decryption error. Please verify that you're using the "
+                "correct key and encrypted data."
             )
     except UnicodeDecodeError:
         raise ValueError(
-            "Invalid decrypted data: The decryption succeeded but the result contains invalid characters. "
-            "This could mean:\n"
-            "- The data was encrypted with a different key than you're using to decrypt\n"
+            "Invalid decrypted data: The decryption succeeded but the "
+            "result contains invalid characters. This could mean:\n"
+            "- The data was encrypted with a different key than you're "
+            "using to decrypt\n"
             "- The encrypted data is corrupted\n"
             "- The data wasn't originally text (binary data was encrypted)"
         )
     except Exception:
         raise ValueError(
-            "Unexpected decryption error. "
-            "Please verify your private key and encrypted data, or contact support if the issue persists."
+            "Unexpected decryption error. Please verify your private key "
+            "and encrypted data, or contact support if the issue persists."
         )
+
+
+def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
+    """Decrypt data with RSA private key in PEM format."""
+    is_pkcs1, is_pkcs8 = _validate_private_key_format(private_key_pem)
+    
+    pem_lines = private_key_pem.strip().splitlines()
+    _validate_pem_structure(pem_lines, "private")
+    _validate_private_key_footer(pem_lines, is_pkcs1)
+    _validate_pem_body(pem_lines)
+    
+    private_key = _load_private_key(private_key_pem)
+    ciphertext = _validate_and_decode_ciphertext(b64_ciphertext)
+    
+    return _perform_decryption(private_key, ciphertext)
