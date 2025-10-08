@@ -43,6 +43,8 @@ export function EncryptionForm({ onLog }) {
 
     setIsLoading(true);
     setError('');
+    // Clear any previous result so a stale success doesn't remain on error
+    setResult('');
     try {
       // Call actual API
       const response = await encryptData(key, payload);
@@ -56,6 +58,8 @@ export function EncryptionForm({ onLog }) {
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Encryption failed. Please check your key format.';
       setError(errorMsg);
+      // Ensure we don't show an old successful result when an error occurs
+      setResult('');
       // keep toast for success only
     } finally {
       setIsLoading(false);
@@ -178,7 +182,7 @@ export function EncryptionForm({ onLog }) {
             </motion.div>
           )}
 
-          {result && (
+          {result && !error && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}

@@ -58,6 +58,8 @@ export function DecryptionForm({ onLog }) {
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Decryption failed. Please check your key and data.';
       setError(errorMsg);
+      // Ensure we don't show an old successful result when an error occurs
+      setResult('');
     } finally {
       setIsLoading(false);
     }
