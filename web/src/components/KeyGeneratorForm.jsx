@@ -41,7 +41,7 @@ export function KeyGeneratorForm() {
         setTimeout(() => setCopiedPrivate(false), 2000);
       }
       toast.success(`${type === 'public' ? 'Public' : 'Private'} key copied to clipboard`);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to copy to clipboard');
     }
   };
