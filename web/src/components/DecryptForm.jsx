@@ -10,7 +10,7 @@ import { Loader2, Unlock, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { decryptData } from '../services/api';
 
-export function DecryptionForm({ onLog }) {
+export function DecryptionForm() {
   const [key, setKey] = useState('');
   const [payload, setPayload] = useState('');
   const [result, setResult] = useState('');
@@ -20,7 +20,6 @@ export function DecryptionForm({ onLog }) {
   const [lastRequestKey, setLastRequestKey] = useState('');
   const [lastRequestPayload, setLastRequestPayload] = useState('');
   const [cooldownUntil, setCooldownUntil] = useState(0);
-  const [tick, setTick] = useState(0);
   const timerRef = useRef(null);
   const COOLDOWN_MS = 5000; // 5 seconds cooldown for same request
 
@@ -69,7 +68,10 @@ export function DecryptionForm({ onLog }) {
   useEffect(() => {
     if (cooldownUntil && cooldownUntil > Date.now()) {
       if (timerRef.current) clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => setTick((t) => t + 1), 1000);
+      timerRef.current = setInterval(() => {
+        // Force re-render to update cooldown display
+        setCooldownUntil((prev) => prev);
+      }, 1000);
       return () => {
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = null;
@@ -90,8 +92,9 @@ export function DecryptionForm({ onLog }) {
       setCopied(true);
       toast.success('Decrypted data copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to copy to clipboard');
+      console.error(err);
     }
   };
 

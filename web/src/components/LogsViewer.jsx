@@ -10,7 +10,6 @@ import { getLogs } from '../services/api';
 
 export function LogsViewer({ clientLogs = [] }) {
   const [serverLogs, setServerLogs] = useState([]);
-  const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 10;
@@ -39,7 +38,6 @@ export function LogsViewer({ clientLogs = [] }) {
       }));
       
       setServerLogs(transformedLogs);
-      setTotal(response.total);
     } catch (error) {
       console.error('Failed to load logs:', error);
     } finally {
