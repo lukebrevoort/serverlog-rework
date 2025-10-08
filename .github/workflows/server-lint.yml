@@ -55,15 +55,20 @@ jobs:
         if: steps.isort-check.outcome == 'failure'
         run: isort src
       
+      - name: Check for changes after formatting
+        id: git-check
+        run: |
+          git diff --exit-code || echo "has_changes=true" >> $GITHUB_OUTPUT
+      
       - name: Commit formatted code
-        if: steps.black-check.outcome == 'failure' || steps.isort-check.outcome == 'failure'
+        if: steps.git-check.outputs.has_changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: auto-format Python code [skip ci]"
           file_pattern: 'server/**'
       
-      - name: Run flake8 (syntax errors)
+      - name: Run flake8 (syntax errors - strict)
         run: flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
       
-      - name: Run flake8 (full check)
+      - name: Run flake8 (full check - strict)
         run: flake8 src --count --max-complexity=10 --max-line-length=127 --statistics
