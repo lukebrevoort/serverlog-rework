@@ -23,7 +23,12 @@ export function KeyGeneratorForm() {
       setKeys(response);
       toast.success('RSA key pair generated successfully!');
     } catch (err) {
-      toast.error('Failed to generate keys. Please try again.');
+      // Handle network/connection errors with detailed messages
+      if (err.isNetworkError || err.isConnectionRefused || err.isTimeoutError) {
+        toast.error(err.message, { duration: 5000 });
+      } else {
+        toast.error('Failed to generate keys. Please try again.');
+      }
       console.error(err);
     } finally {
       setLoading(false);
