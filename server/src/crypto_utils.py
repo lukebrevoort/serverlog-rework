@@ -13,12 +13,12 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             "Public key is required. Please paste your RSA public key in PEM format. "
             "It should start with '-----BEGIN PUBLIC KEY-----' and end with '-----END PUBLIC KEY-----'."
         )
-    # Need to have data, incase user pastes empty string 
+    # Need to have data, incase user pastes empty string
     if not plaintext or not plaintext.strip():
         raise ValueError(
             "Data to encrypt is required. Please enter the text you want to encrypt."
         )
-    
+
     # Check key format
     if not public_key_pem.strip().startswith("-----BEGIN PUBLIC KEY-----"):
         raise ValueError(
@@ -31,7 +31,7 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
         )
 
     pem_lines = public_key_pem.strip().splitlines()
-    
+
     # Validate PEM structure
     if len(pem_lines) < 3:
         raise ValueError(
@@ -42,19 +42,19 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             "3. -----END PUBLIC KEY-----\n"
             "Please check that you copied the entire key."
         )
-    
+
     if not pem_lines[0].strip().startswith("-----BEGIN PUBLIC KEY-----"):
         raise ValueError(
             "Invalid public key header: The first line must be '-----BEGIN PUBLIC KEY-----'. "
             "Please ensure you're copying the complete public key starting from the header."
         )
-    
+
     if not pem_lines[-1].strip().startswith("-----END PUBLIC KEY-----"):
         raise ValueError(
             "Invalid public key footer: The last line must be '-----END PUBLIC KEY-----'. "
             "Please ensure you're copying the complete public key including the footer."
         )
-    
+
     # Validate base64 content
     key_body = "".join(pem_lines[1:-1])
     if not key_body.strip():
@@ -62,7 +62,7 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             "Empty public key content: The key has valid headers but no data between them. "
             "Please ensure you copied the complete key including the base64-encoded data."
         )
-    
+
     try:
         base64.b64decode(key_body, validate=True)
     except Exception:
@@ -74,7 +74,7 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             "- Key data was corrupted during copy/paste\n"
             "- Wrong key format (make sure it's PEM, not DER or other formats)"
         )
-    
+
     # Load and validate the public key
     try:
         public_key = serialization.load_pem_public_key(
@@ -100,7 +100,7 @@ def encrypt_data(public_key_pem: str, plaintext: str) -> str:
             "Unexpected error loading public key. "
             "Please ensure you're using a valid RSA public key in PEM format."
         )
-    
+
     # Perform encryption
     try:
         ciphertext = public_key.encrypt(
@@ -150,12 +150,12 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
         raise ValueError(
             "Encrypted data is required. Please paste the base64-encoded encrypted text you want to decrypt."
         )
-    
+
     # Check key format
     private_key_pem_stripped = private_key_pem.strip()
     is_pkcs1 = private_key_pem_stripped.startswith("-----BEGIN RSA PRIVATE KEY-----")
     is_pkcs8 = private_key_pem_stripped.startswith("-----BEGIN PRIVATE KEY-----")
-    
+
     if not (is_pkcs1 or is_pkcs8):
         raise ValueError(
             "Invalid private key format: The key must start with either:\n"
@@ -167,9 +167,9 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "MIIEvgIBADANBgkqhkiG9w0BAQEFAASC...\n"
             "-----END PRIVATE KEY-----"
         )
-    
+
     pem_lines = private_key_pem_stripped.splitlines()
-    
+
     # Validate PEM structure
     if len(pem_lines) < 3:
         raise ValueError(
@@ -180,14 +180,16 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "3. -----END PRIVATE KEY----- (or END RSA PRIVATE KEY)\n"
             "Please check that you copied the entire key."
         )
-    
-    expected_footer = "-----END RSA PRIVATE KEY-----" if is_pkcs1 else "-----END PRIVATE KEY-----"
+
+    expected_footer = (
+        "-----END RSA PRIVATE KEY-----" if is_pkcs1 else "-----END PRIVATE KEY-----"
+    )
     if not pem_lines[-1].strip().startswith(expected_footer):
         raise ValueError(
             f"Invalid private key footer: The last line must be '{expected_footer}'. "
             "Please ensure you're copying the complete private key including the footer."
         )
-    
+
     # Validate base64 content
     key_body = "".join(pem_lines[1:-1])
     if not key_body.strip():
@@ -195,7 +197,7 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "Empty private key content: The key has valid headers but no data between them. "
             "Please ensure you copied the complete key including the base64-encoded data."
         )
-    
+
     # Load the private key
     try:
         private_key = serialization.load_pem_private_key(
@@ -239,7 +241,7 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "Unexpected error loading private key. "
             "Please ensure you're using a valid RSA private key in PEM format."
         )
-    
+
     # Validate and decode ciphertext
     try:
         ciphertext = base64.b64decode(b64_ciphertext.strip().encode(), validate=True)
@@ -251,13 +253,13 @@ def decrypt_data(private_key_pem: str, b64_ciphertext: str) -> str:
             "- Extra spaces or line breaks were added\n"
             "- Wrong data was pasted (make sure it's the encrypted output, not the original text)"
         )
-    
+
     if len(ciphertext) == 0:
         raise ValueError(
             "Empty encrypted data: The encrypted data cannot be empty. "
             "Please paste the complete base64-encoded encrypted text."
         )
-    
+
     # Perform decryption
     try:
         plaintext = private_key.decrypt(
